@@ -49,7 +49,10 @@ x-airflow-common:
   # In order to add custom dependencies or upgrade provider packages you can use your extended image.
   # Comment the image line, place your Dockerfile in the directory where you placed the docker-compose.yaml
   # and uncomment the "build" line below, Then run `docker-compose build` to build the images.
-  image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.8.3}
+  # image: ${AIRFLOW_IMAGE_NAME:-apache/airflow:2.8.3}
+  build:
+    context: .
+    dockerfile: ./docker/Dockerfile.dagster
   # build: .
   environment:
     &airflow-common-env
@@ -279,19 +282,28 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  # Create sftp server
   sftp-dev-1:
     image: "emberstack/sftp"
     ports:
       - "22:22"
+    networks:
+      - airflow_network
     volumes:
-      - ../samples/sample.sftp.json:/app/config/sftp.json:ro
+      - ${AIRFLOW_PROJ_DIR}/docker/sftp.dev.2.json:/app/config/sftp.json:ro
 
   sftp-dev-2:
     image: "emberstack/sftp"
     ports:
       - "22:23"
+    networks:
+      - airflow_network
     volumes:
-      - ${_APP_AIRFLOW_DEMO_HOME}/docker/sftp-dev-1.json:/app/config/sftp.json:ro
+      - ${AIRFLOW_PROJ_DIR}/docker/sftp.dev.2.json:/app/config/sftp.json:ro
 
 volumes:
   postgres-db-volume:
+
+networks:
+  airflow_network:
+    driver: bridge
