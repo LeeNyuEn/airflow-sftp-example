@@ -279,5 +279,19 @@ services:
       airflow-init:
         condition: service_completed_successfully
 
+  sftp-dev-1:
+    image: "emberstack/sftp"
+    ports:
+      - "22:22"
+    volumes:
+      - ../samples/sample.sftp.json:/app/config/sftp.json:ro
+
+  sftp-dev-2:
+    image: "emberstack/sftp"
+    ports:
+      - "22:23"
+    volumes:
+      - ${_APP_AIRFLOW_DEMO_HOME}/docker/sftp-dev-1.json:/app/config/sftp.json:ro
+
 volumes:
   postgres-db-volume:
