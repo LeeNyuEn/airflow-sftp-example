@@ -2,12 +2,10 @@
 # Currently this version is 2.8.3
 FROM apache/airflow:2.8.3
 
+USER airflow
+
 # Copy the requirements file into the container
 COPY ../requirements.txt /requirements.txt
 
 # Install the Python dependencies
 RUN pip install --no-cache-dir -r /requirements.txt
-
-ENTRYPOINT ["/usr/bin/dumb-init" "--" "/entrypoint"]
-
-CMD []
