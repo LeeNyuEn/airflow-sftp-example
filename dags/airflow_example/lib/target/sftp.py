@@ -12,5 +12,5 @@ class SftpDataTargetManager(DataTargetManager, SftpManager):
     ) -> None:
         with self.sftp_client.open(destination_file_path, "ab") as destination_file:
             destination_file.set_pipelined(True)
-            for chunk in enumerate(chunks):
+            for chunk in chunks:
                 destination_file.write(chunk)

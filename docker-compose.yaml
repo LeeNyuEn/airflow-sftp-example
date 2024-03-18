@@ -293,6 +293,7 @@ services:
       - airflow_network
     volumes:
       - ${AIRFLOW_PROJ_DIR:-.}/docker/sftp.dev.1.json:/app/config/sftp.json:ro
+      - ${AIRFLOW_PROJ_DIR:-.}/assets:/home/demo/sftp
     restart: always
 
   sftp-dev-2:

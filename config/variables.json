@@ -1,0 +1,10 @@
+{
+    "dag_file_transfer_config": {
+        "sftp_source": {
+            "directory": "/sftp"
+        },
+        "sftp_target": {
+            "directory": "/sftp"
+        }
+    }
+}
