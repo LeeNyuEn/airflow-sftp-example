@@ -3,6 +3,8 @@ from typing import Dict
 
 from airflow_example.lib.source import DataSourceManagerFactory
 from airflow_example.lib.target import DataTargetManagerFactory
+from airflow_example.lib.transform.base import DataTransformer
+from airflow_example.utils import list_util
 
 
 class DataPipeline(abc.ABC):
@@ -50,9 +52,14 @@ class SftpFileTransferPipeline(DataPipeline):
         self,
         source_config: Dict,
         target_config: Dict,
-        transformer=None,
+        transformer: DataTransformer = None,
     ):
         super().__init__("sftp", "sftp", source_config, target_config, transformer)
 
     def run(self):
-        print("Hello")
+        source_file_paths, source_directory = self.source_manager.list_files()
+        target_file_paths, target_directory = self.target_manager.list_files()
+        files_to_put = list_util.not_in(source_file_paths, target_file_paths)
+        directory_to_create = list_util.not_in(source_directory, target_directory)
+        print(files_to_put)
+        print(directory_to_create)

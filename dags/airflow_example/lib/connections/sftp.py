@@ -1,6 +1,6 @@
 import abc
 import stat
-from typing import List, Union
+from typing import List, Tuple, Union
 
 from airflow.providers.sftp.hooks.sftp import SFTPHook
 from paramiko import SFTPClient, Transport
@@ -15,15 +15,17 @@ class SftpManager(abc.ABC):
         username: Union[str, None] = None,
         password: Union[str, None] = None,
         hook: Union[SFTPHook, None] = None,
+        directory: str = "/",
     ):
         self.host = host
         self.port = port
         self.username = username
         self.password = password
         self.hook = hook
+        self.directory = directory
         self.sftp_client: SFTPClient = self.get_sftp_client()
 
-    def get_sftp_client(self):
+    def get_sftp_client(self) -> SFTPClient:
         if self.hook:
             return self.hook.get_conn()
         else:
@@ -34,23 +36,34 @@ class SftpManager(abc.ABC):
             except Exception as e:
                 print(f"Error occurred during connect to sftp: {str(e)}")
 
-    def create_directory_if_not_exists(sftp_client, directory):
+    def create_directory_if_not_exists(sftp_client, directory) -> None:
         try:
             sftp_client.stat(directory)
         except FileNotFoundError:
+            print(f"File not found, create new: {directory}")
             sftp_client.mkdir(directory)
 
-    def list_files(self, directory: str) -> List[str]:
+    def list_files(
+        self, directory: Union[str, None] = None
+    ) -> Tuple[List[str], List[str]]:
+        directory = directory if directory else self.directory
         files = []
+        directories = []
 
         def _list_files_recursively(remote_directory):
-            for item in self.sftp_client.listdir_attr(remote_directory):
-                item_path = remote_directory + "/" + item.filename
-                if stat.S_ISDIR(item.st_mode):
-                    _list_files_recursively(item_path)
-                else:
-                    files.append(item_path)
+            directories.append(remote_directory)
+            try:
+                for item in self.sftp_client.listdir_attr(remote_directory):
+                    item_path = remote_directory + "/" + item.filename
+                    if stat.S_ISDIR(item.st_mode):
+                        _list_files_recursively(item_path)
+                    else:
+                        files.append(
+                            item_path,
+                        )
+            except FileNotFoundError:
+                print("Folder not found")
 
         _list_files_recursively(directory)
 
-        return files
+        return files, list(set(directories))

@@ -1,10 +1,8 @@
 from datetime import timedelta
-from airflow.providers.sftp.hooks.sftp import SFTPHook
+
 import pendulum
-
+from airflow.providers.sftp.hooks.sftp import SFTPHook
 from airflow.decorators import dag, task
-
-from airflow_example.lib.pipeline import SftpFileTransferPipeline
 
 
 @dag(
@@ -18,23 +16,30 @@ from airflow_example.lib.pipeline import SftpFileTransferPipeline
     tags=["etl", "sftp"],
 )
 def file_transfer():
+    from airflow_example.lib.pipeline import SftpFileTransferPipeline
+
     @task
-    def sftp_file_transfer():
+    def sftp_file_transfer(source_directory, target_directory):
         sftp_transfer_pipeline = SftpFileTransferPipeline(
             source_config={
                 "hook": SFTPHook(
                     ssh_conn_id="sftp_source",
                 ),
+                "directory": source_directory,
             },
             target_config={
                 "hook": SFTPHook(
                     ssh_conn_id="sftp_target",
                 ),
+                "directory": target_directory,
             },
         )
         sftp_transfer_pipeline.run()
 
-    sftp_file_transfer()
+    sftp_file_transfer(
+        source_directory="{{var.json.dag_file_transfer_config.sftp_source.directory}}",
+        target_directory="{{var.json.dag_file_transfer_config.sftp_target.directory}}",
+    )
 
 
 file_transfer()
