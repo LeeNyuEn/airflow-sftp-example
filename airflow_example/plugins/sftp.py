@@ -1,5 +1,6 @@
 import abc
-from typing import Union
+import stat
+from typing import List, Union
 
 from airflow.providers.sftp.hooks.sftp import SFTPHook
 from paramiko import SFTPClient, Transport
@@ -32,3 +33,24 @@ class SftpManager(abc.ABC):
                 return SFTPClient.from_transport(transport)
             except Exception as e:
                 print(f"Error occurred during connect to sftp: {str(e)}")
+
+    def create_directory_if_not_exists(sftp_client, directory):
+        try:
+            sftp_client.stat(directory)
+        except FileNotFoundError:
+            sftp_client.mkdir(directory)
+
+    def list_files(self, directory: str) -> List[str]:
+        files = []
+
+        def _list_files_recursively(remote_directory):
+            for item in self.sftp_client.listdir_attr(remote_directory):
+                item_path = remote_directory + "/" + item.filename
+                if stat.S_ISDIR(item.st_mode):
+                    _list_files_recursively(item_path)
+                else:
+                    files.append(item_path)
+
+        _list_files_recursively(directory)
+
+        return files
