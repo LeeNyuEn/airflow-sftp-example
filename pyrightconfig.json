@@ -1,0 +1,11 @@
+{
+  "include": [
+    "."
+  ],
+  "exclude": [],
+  "executionEnvironments": {
+    "root": "."
+  },
+  "typeCheckingMode": "off",
+  "reportUnusedVariable": false
+}

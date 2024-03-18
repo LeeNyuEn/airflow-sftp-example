@@ -1,88 +1,74 @@
-import paramiko
+from airflow import DAG
+from airflow.decorators import dag, task
+from airflow.utils.dates import days_ago
+from time import sleep
 
 
-class SFTPTransferToAnotherSFTP:
-    def __init__(
-        self,
-        source_host,
-        source_port,
-        source_username,
-        source_password,
-        destination_host,
-        destination_port,
-        destination_username,
-        destination_password,
-    ):
-        self.source_host = source_host
-        self.source_port = source_port
-        self.source_username = source_username
-        self.source_password = source_password
-        self.destination_host = destination_host
-        self.destination_port = destination_port
-        self.destination_username = destination_username
-        self.destination_password = destination_password
+@task
+def retrieve_file_in_chunks(
+    source_hook, source_file_path, destination_hook, destination_file_path
+):
+    chunk_size = 8192  # Adjust the chunk size as needed
+    retry_delay = 10  # Seconds to wait before retrying
+    max_retries = 3  # Maximum number of retries
 
-    def execute_transfer(self, source_file_path, destination_file_path):
-        source_transport = paramiko.Transport((self.source_host, self.source_port))
-        source_transport.connect(
-            username=self.source_username, password=self.source_password
-        )
-        source_client = paramiko.SFTPClient.from_transport(source_transport)
+    with source_hook.get_conn() as source_conn:
+        source_sftp = source_conn.open_sftp()
+        source_file_size = source_sftp.stat(source_file_path).st_size
 
-        destination_transport = paramiko.Transport(
-            (self.destination_host, self.destination_port)
-        )
-        destination_transport.connect(
-            username=self.destination_username, password=self.destination_password
-        )
-        destination_client = paramiko.SFTPClient.from_transport(destination_transport)
+        with destination_hook.get_conn() as destination_conn:
+            destination_sftp = destination_conn.open_sftp()
 
-        try:
-            source_file_size = source_client.stat(source_file_path).st_size
             last_position = 0
+            retries = 0
 
-            with source_client.open(source_file_path, "rb") as source_file:
-                with destination_client.open(
-                    destination_file_path, "wb"
-                ) as destination_file:
-                    while last_position < source_file_size:
+            while last_position < source_file_size:
+                try:
+                    with source_sftp.open(source_file_path, "rb") as source_file:
                         source_file.seek(last_position)
-                        chunk = source_file.read(8192)  # Adjust chunk size if needed
-                        destination_file.write(chunk)
+                        chunk = source_file.read(chunk_size)
+
+                        with destination_sftp.open(
+                            destination_file_path, "ab"
+                        ) as destination_file:
+                            destination_file.write(chunk)
+
                         last_position = source_file.tell()
 
-        except (paramiko.SSHException, IOError) as e:
-            print(f"Error moving file: {e}")
-            raise
-        finally:
-            source_client.close()
-            source_transport.close()
-            destination_client.close()
-            destination_transport.close()
+                except Exception as e:
+                    print(f"Error: {e}")
+                    retries += 1
+                    if retries == max_retries:
+                        print("Max retries reached. Could not complete the operation.")
+                        raise Exception("Max retries reached")
+                    print(f"Retrying in {retry_delay} seconds...")
+                    sleep(retry_delay)
+                    continue
+
+                retries = 0  # Reset retry count if successful
 
 
-# Example usage
-source_host = "source_sftp.example.com"
-source_port = 22
-source_username = "source_username"
-source_password = "source_password"
-
-destination_host = "destination_sftp.example.com"
-destination_port = 22
-destination_username = "destination_username"
-destination_password = "destination_password"
-
-source_file_path = "/path/to/source/file.txt"
-destination_file_path = "/path/to/destination/file.txt"
-
-transfer = SFTPTransferToAnotherSFTP(
-    source_host,
-    source_port,
-    source_username,
-    source_password,
-    destination_host,
-    destination_port,
-    destination_username,
-    destination_password,
+@dag(
+    default_args={
+        "owner": "airflow",
+        "depends_on_past": False,
+        "start_date": days_ago(1),
+    },
+    schedule_interval=None,
+    description="A DAG to transfer a file from SFTP A to SFTP B",
 )
-transfer.execute_transfer(source_file_path, destination_file_path)
+def sftp_transfer_dag():
+    source_sftp_conn_id = "source_sftp_connection"
+    destination_sftp_conn_id = "destination_sftp_connection"
+    source_file_path = "/path/to/source/file.txt"
+    destination_file_path = "/path/to/destination/file.txt"
+
+    transfer_task = retrieve_file_in_chunks(
+        SFTPHook(ftp_conn_id=source_sftp_conn_id),
+        source_file_path,
+        SFTPHook(ftp_conn_id=destination_sftp_conn_id),
+        destination_file_path,
+    )
+
+
+sftp_transfer_dag = sftp_transfer_dag()

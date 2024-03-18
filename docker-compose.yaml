@@ -70,8 +70,8 @@ x-airflow-common:
     _PIP_ADDITIONAL_REQUIREMENTS: ${_PIP_ADDITIONAL_REQUIREMENTS:-}
   volumes:
     - ${AIRFLOW_PROJ_DIR:-.}/airflow_example/dags:/opt/airflow/dags
-    - ${AIRFLOW_PROJ_DIR:-.}/airflow_example/logs:/opt/airflow/logs
-    - ${AIRFLOW_PROJ_DIR:-.}/airflow_example/config:/opt/airflow/config
+    - ${AIRFLOW_PROJ_DIR:-.}/logs:/opt/airflow/logs
+    - ${AIRFLOW_PROJ_DIR:-.}/config:/opt/airflow/config
     - ${AIRFLOW_PROJ_DIR:-.}/airflow_example/plugins:/opt/airflow/plugins
   networks:
     - airflow_network
@@ -293,6 +293,7 @@ services:
       - airflow_network
     volumes:
       - ${AIRFLOW_PROJ_DIR}/docker/sftp.dev.1.json:/app/config/sftp.json:ro
+    restart: always
 
   sftp-dev-2:
     image: "emberstack/sftp"
@@ -302,6 +303,7 @@ services:
       - airflow_network
     volumes:
       - ${AIRFLOW_PROJ_DIR}/docker/sftp.dev.2.json:/app/config/sftp.json:ro
+    restart: always
 
 volumes:
   postgres-db-volume:
