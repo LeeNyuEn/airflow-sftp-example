@@ -2,9 +2,9 @@
 from airflow_example.lib.transform.base import DataTransformer
 
 
-class SomeFanctyTransfromationHere(DataTransformer):
+class SomeFanctyTextTransfromationHere(DataTransformer):
     """
-    Class to define and handle fancy data trsnfromation
+    Class to define and handle fancy data transformation
     """
     def transform(self):
         print("Doing some mythic transformation there!")

@@ -1,6 +1,6 @@
 import abc
-from airflow_example.lib.source import DataSourceManagerFactory
 
+from airflow_example.lib.source import DataSourceManagerFactory
 from airflow_example.lib.target import DataTargetManagerFactory
 
 
@@ -49,4 +49,4 @@ class SftpFileTransferPipeline(DataPipeline):
         super().__init__("sftp", "sftp", source_config, target_config, transformer)
 
     def run(self):
-        pass
+        print("Hello")
