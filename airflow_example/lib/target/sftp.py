@@ -1,10 +1,8 @@
 from airflow_example.lib.target.base import DataTargetManager
+from airflow_example.plugins.sftp import SftpManager
 
 
-class SftpDataTargetManager(DataTargetManager):
-    def __init__(self, bucket_name):
-        self.bucket_name = bucket_name
-
-    def ingest_data(self, data):
+class SftpDataTargetManager(SftpManager, DataTargetManager):
+    def ingest_data(self):
         # Logic to ingest data into Google Cloud Storage
-        print("Ingesting data into Google Cloud Storage")
+        print("Ingesting data into SFTP Server")
