@@ -1,6 +1,11 @@
+import os
+
 from dynaconf import Dynaconf
 
+current_folder = os.path.dirname(os.path.abspath(__file__))
+
 settings = Dynaconf(
-    envvar_prefix="DYNACONF",
-    settings_files=["./config/settings.toml", "./config/.secrets.toml"],
+    settings_files=[
+        f"{current_folder}/airflow_example/config/settings.toml",
+    ],
 )

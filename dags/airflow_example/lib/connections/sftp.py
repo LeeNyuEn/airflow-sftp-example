@@ -24,26 +24,22 @@ class SftpManager(abc.ABC):
         self.hook = hook
         self.directory = directory
         self.sftp_client: SFTPClient = None
-        self.transport: Transport = None
 
     def get_sftp_client(self) -> None:
         if self.sftp_client is None:
             if self.hook:
-                return self.hook.get_conn()
+                self.sftp_client = self.hook.get_conn()
             else:
                 try:
                     transport = Transport((self.host, self.port))
                     transport.connect(username=self.username, password=self.password)
                     self.sftp_client = SFTPClient.from_transport(transport)
-                    self.transport = transport
                 except Exception as e:
                     print(f"Error occurred during connect to sftp: {str(e)}")
 
     def close_connection(self) -> None:
         if self.sftp_client:
             self.sftp_client.close()
-        if self.transport:
-            self.transport.close()
 
     def create_directory_if_not_exists(self, directory: str) -> None:
         try:
