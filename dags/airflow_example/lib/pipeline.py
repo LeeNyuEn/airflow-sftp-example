@@ -1,5 +1,5 @@
 import abc
-from typing import Dict
+from typing import Dict, List, Union
 
 from airflow_example.lib.source import DataSourceManagerFactory
 from airflow_example.lib.target import DataTargetManagerFactory
@@ -56,6 +56,12 @@ class SftpFileTransferPipeline(DataPipeline):
     ):
         super().__init__("sftp", "sftp", source_config, target_config, transformer)
 
+    def __create_directory(self, directories: Union[List[str], None] = None) -> None:
+        if directories:
+            self.target_manager.create_directory_recursive(directories)
+        else:
+            print(f"No directory needed to create")
+
     def run(self):
         source_file_paths, source_directory = self.source_manager.list_files()
         target_file_paths, target_directory = self.target_manager.list_files()
@@ -63,3 +69,4 @@ class SftpFileTransferPipeline(DataPipeline):
         directory_to_create = list_util.not_in(source_directory, target_directory)
         print(files_to_put)
         print(directory_to_create)
+        self.__create_directory(directory_to_create)
