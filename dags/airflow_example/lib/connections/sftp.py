@@ -3,7 +3,7 @@ import stat
 from typing import List, Tuple, Union
 
 from airflow.providers.sftp.hooks.sftp import SFTPHook
-from paramiko import SFTPClient, Transport
+from paramiko import SFTPClient, SFTPError, Transport
 
 
 class SftpManager(abc.ABC):
@@ -36,12 +36,28 @@ class SftpManager(abc.ABC):
             except Exception as e:
                 print(f"Error occurred during connect to sftp: {str(e)}")
 
-    def create_directory_if_not_exists(sftp_client, directory) -> None:
+    def create_directory_if_not_exists(self, directory: str) -> None:
         try:
-            sftp_client.stat(directory)
+            self.sftp_client.stat(directory)
         except FileNotFoundError:
             print(f"File not found, create new: {directory}")
-            sftp_client.mkdir(directory)
+            self.sftp_client.mkdir(directory)
+
+    def create_directory_recursive(
+        self,
+        directories: List[str],
+    ) -> None:
+        for directory in directories:
+            parts = directory.split("/")
+            for i in range(1, len(parts)):
+                partial_path = "/".join(parts[: i + 1])
+                try:
+                    self.sftp_client.stat(partial_path)
+                except FileNotFoundError:
+                    try:
+                        self.create_directory_if_not_exists(partial_path)
+                    except SFTPError as e:
+                        print(f"Failed to create directory {partial_path}: {e}")
 
     def list_files(
         self, directory: Union[str, None] = None
