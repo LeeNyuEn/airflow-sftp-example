@@ -1,12 +1,14 @@
 from time import sleep
 
+from config import settings
+
 
 def retrieve_file_in_chunks(
     source_hook, source_file_path, destination_hook, destination_file_path
 ):
-    chunk_size = 8192  # Adjust the chunk size as needed
-    retry_delay = 10  # Seconds to wait before retrying
-    max_retries = 3  # Maximum number of retries
+    chunk_size = settings.chunk_size  # Adjust the chunk size as needed
+    retry_delay = settings.retry_delay  # Seconds to wait before retrying
+    max_retries = settings.max_retries  # Maximum number of retries
 
     with source_hook.get_conn() as source_conn:
         source_sftp = source_conn.open_sftp()

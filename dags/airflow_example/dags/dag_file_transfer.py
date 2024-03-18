@@ -21,12 +21,16 @@ def file_transfer():
     @task
     def sftp_file_transfer():
         sftp_transfer_pipeline = SftpFileTransferPipeline(
-            source_config=SFTPHook(
-                ssh_conn_id="sftp_source",
-            ),
-            target_config=SFTPHook(
-                ssh_conn_id="sftp_target",
-            ),
+            source_config={
+                "hook": SFTPHook(
+                    ssh_conn_id="sftp_source",
+                ),
+            },
+            target_config={
+                "hook": SFTPHook(
+                    ssh_conn_id="sftp_target",
+                ),
+            },
         )
         sftp_transfer_pipeline.run()
 

@@ -1,4 +1,5 @@
 import abc
+from typing import Dict
 
 from airflow_example.lib.source import DataSourceManagerFactory
 from airflow_example.lib.target import DataTargetManagerFactory
@@ -15,7 +16,12 @@ class DataPipeline(abc.ABC):
     """
 
     def __init__(
-        self, source_type, target_type, source_config, target_config, transformer=None
+        self,
+        source_type: str,
+        target_type: str,
+        source_config: Dict,
+        target_config: Dict,
+        transformer=None,
     ):
         self.source_manager = DataSourceManagerFactory.create_source_manager(
             source_type, **source_config
@@ -42,8 +48,8 @@ class SftpFileTransferPipeline(DataPipeline):
 
     def __init__(
         self,
-        source_config,
-        target_config,
+        source_config: Dict,
+        target_config: Dict,
         transformer=None,
     ):
         super().__init__("sftp", "sftp", source_config, target_config, transformer)

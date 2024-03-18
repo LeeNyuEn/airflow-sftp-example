@@ -1,0 +1,4 @@
+[sftp_default_config]
+chunk_size = 1024  # Chunk size
+retry_delay = 10  # Seconds delay each retries
+max_retries = 3  # Maximum times retry
