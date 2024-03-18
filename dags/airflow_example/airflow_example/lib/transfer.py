@@ -1,10 +1,6 @@
-from airflow.decorators import dag, task
-from airflow.utils.dates import days_ago
-from airflow.providers.sftp.hooks.sftp import SFTPHook
 from time import sleep
 
 
-@task
 def retrieve_file_in_chunks(
     source_hook, source_file_path, destination_hook, destination_file_path
 ):
@@ -46,29 +42,3 @@ def retrieve_file_in_chunks(
                     continue
 
                 retries = 0  # Reset retry count if successful
-
-
-@dag(
-    default_args={
-        "owner": "airflow",
-        "depends_on_past": False,
-        "start_date": days_ago(1),
-    },
-    schedule_interval=None,
-    description="A DAG to transfer a file from SFTP A to SFTP B",
-)
-def sftp_transfer_dag():
-    source_sftp_conn_id = "source_sftp_connection"
-    destination_sftp_conn_id = "destination_sftp_connection"
-    source_file_path = "/path/to/source/file.txt"
-    destination_file_path = "/path/to/destination/file.txt"
-
-    transfer_task = retrieve_file_in_chunks(
-        SFTPHook(ftp_conn_id=source_sftp_conn_id),
-        source_file_path,
-        SFTPHook(ftp_conn_id=destination_sftp_conn_id),
-        destination_file_path,
-    )
-
-
-sftp_transfer_dag = sftp_transfer_dag()

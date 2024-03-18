@@ -1,5 +1,4 @@
 
-from airflow_example.lib.target.base import DataTargetManager
 from airflow_example.lib.target.sftp import SftpDataTargetManager
 
 
