@@ -7,7 +7,7 @@ from airflow_example.lib.source import DataSourceManagerFactory
 from airflow_example.lib.target import DataTargetManagerFactory
 from airflow_example.lib.transform.base import DataTransformer
 from airflow_example.utils import list_util
-from config import settings, current_folder
+from config import settings
 
 
 class DataPipeline(abc.ABC):
