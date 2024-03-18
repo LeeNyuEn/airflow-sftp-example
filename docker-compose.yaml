@@ -118,6 +118,7 @@ services:
   airflow-webserver:
     <<: *airflow-common
     command: webserver
+    container_name: airflow_exammple-airflow-webserver-1
     ports:
       - "8080:8080"
     healthcheck:
