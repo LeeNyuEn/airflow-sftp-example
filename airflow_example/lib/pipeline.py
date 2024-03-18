@@ -45,10 +45,8 @@ class SftpFileTransferPipeline(DataPipeline):
         source_config,
         target_config,
         transformer=None,
-        replaced_if_exists=False,
     ):
         super().__init__("sftp", "sftp", source_config, target_config, transformer)
-        self.replaced_if_exists = replaced_if_exists
 
     def run(self):
         pass
