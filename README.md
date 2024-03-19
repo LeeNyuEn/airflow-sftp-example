@@ -18,7 +18,7 @@ cd airflow-sftp-example
 
 To build the Airflow image, ensure you have Docker installed on your system. Execute the following command in terminal:
 ```bash
-sudo docker build -t <airflow_image_name> -f docker/Dockerfile.airflow .
+sudo docker build -t airflow_image_name -f docker/Dockerfile.airflow .
 ```
 Replace `airflow_image_name` with the desired name for your Airflow image. If you've changed the default value, remember to update the `.env` file with the new image name.
 
@@ -54,8 +54,8 @@ sudo docker compose up -d --build
 
 Configure Airflow connections and variables, replacing container names with the correct ones created:
 ```bash
-sudo docker exec <airflow_exammple-airflow-webserver-1> airflow connections import config/connections.json
-sudo docker exec <airflow_exammple-airflow-webserver-1> airflow variables import config/variables.json
+sudo docker exec airflow_exammple-airflow-webserver-1 airflow connections import config/connections.json
+sudo docker exec airflow_exammple-airflow-webserver-1 airflow variables import config/variables.json
 ```
 
 # Usage
