@@ -61,7 +61,7 @@ sudo docker exec <airflow_exammple-airflow-webserver-1> airflow variables import
 # Usage
 To access the Airflow web interface, open a web browser and navigate to http://localhost:8080. Use the default username `airflow` and password `airflow` to log in.
 
-# Explaination
+# Explanation
 
 ## Coding principles
 Code is written using **OOP** approach, by dividing it into basic components: **source**, **transform**, **target**, and **pipeline**. Each component has a distinct responsibility:
