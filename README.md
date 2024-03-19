@@ -109,9 +109,11 @@ Two straightforward approaches to transfer files from one SFTP server to another
 
 ### Big File Transfer
 
-In scenarios where large files, often gigabytes in size, need to be transferred via SFTP, memory issues on the server can lead to transfer delays or hang-ups. To mitigate this, I've implemented a chunked transfer method, sending data in manageable 4MB each packs between SFTP servers. While this approach resolves memory concerns, it presents its own challenge which is the transfer speeds are noticeably slower compared to direct SFTP commands. For instance, transferring a 1GB file on my development environment typically takes around 6 minutes, making it challenging to handle terabyte-sized files within small interval (5 to 10 minutes).
+In scenarios where large files, often gigabytes in size, need to be transferred via SFTP, memory issues on the server can lead to transfer delays or hang-ups, potentially caused by limitations in the Paramiko library used by Airflow. To mitigate this, I've implemented a chunked transfer method, sending data in manageable 4MB each packs between SFTP servers. While this approach resolves memory concerns, it introduces a new challenge: slower transfer speeds compared to direct SFTP commands. 
 
-Idea: There are some ideas to solve this problem, but they have not been tested or tried yet. It may require time to investigate and verify if these solutions are effective:
+For instance, transferring a 1GB file on my development environment typically takes around 6 minutes, making it challenging to handle terabyte-sized files within small interval (5 to 10 minutes).
+
+**Idea**: There are some ideas to solve this problem, but they have not been tested or tried yet. It may require time to investigate and verify if these solutions are effective:
 
 - Develop a module using subprocess to download files locally and upload them using SFTP. We could utilize a BashOperator and a temporary folder for this purpose.
 - Implement multithreading to transfer files by reading and writing data from specified positions in the file.
